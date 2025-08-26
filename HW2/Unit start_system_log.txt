@@ -1,0 +1,10 @@
+[Unit]
+Description=Datetime start system
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/sergey/start_system_check.sh
+
+[Install]
+WantedBy=multi-user.target

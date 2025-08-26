@@ -1,0 +1,7 @@
+#!/bin/bash
+read -rp "Enter the path to file: " path
+if grep -q 'error' $path;
+then sudo rm -r $path
+echo "File $path sucsessfuly deleted"
+else echo "There is no error in the file $path"
+fi

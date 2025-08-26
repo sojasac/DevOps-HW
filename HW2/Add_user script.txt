@@ -1,0 +1,10 @@
+#!/bin/bash
+set -euo pipefail
+
+read -rp "Enter username: " user
+
+if grep -q "^${user}:" /etc/passwd;
+then echo "User $user already exists"
+else sudo useradd -m "$user"
+     echo "User $user successfully created"
+fi
