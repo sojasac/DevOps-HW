@@ -1,0 +1,11 @@
+pipeline {
+    agent {label 'windows_agent'}
+
+    stages {
+        stage('Who am I') {
+            steps {
+                bat 'whoami'
+            }
+        }
+    }
+}
