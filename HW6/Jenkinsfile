@@ -1,0 +1,11 @@
+pipeline {
+    agent { label 'elkagent' }
+
+    stages {
+        stage('elk_run') {
+            steps {
+                sh 'docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -e ES_JAVA_OPTS="-Xms512m -Xmx512m" --memory=1g --cpus=1 elasticsearch:8.17.10'
+            }
+        }
+    }
+}
