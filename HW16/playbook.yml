@@ -1,28 +1,35 @@
-- name: Full EC2 + Docker workflow
+- name: Create Instance with Docker and Remove
   hosts: localhost
   gather_facts: no
   vars:
     aws_region: us-east-1
     instance_type: t2.micro
-    ami: ami-0c94855ba95c71c99    # Ubuntu 22.04, поменяй на свой регион
-    key_name: my_aws_key          # SSH ключ для инстанса
-    security_group: default
-    docker_image: nginx:latest
-
+    ami: ami-0360c520857e3138f
+    key_name: devops_september
+    vpc_subnet_id: subnet-091c355c067bc8713
   tasks:
-
-    - name: Launch EC2 instance
+    - name: Create E2
       amazon.aws.ec2_instance:
-        name: ansible-test
+        name: "serg"
         key_name: "{{ key_name }}"
-        instance_type: "{{ instance_type }}"
+        vpc_subnet_id: "{{ vpc_subnet_id }}"
+        instance_type: "{{ instance_type  }}"
+        security_group: default
+        network:
+          associate_public_ip_address: yes
         image_id: "{{ ami }}"
-        region: "{{ aws_region }}"
-        security_groups: ["{{ security_group }}"]
         wait: yes
       register: ec2
 
-    - name: Wait for SSH to come up
+    - name: Show EC2 info
+      debug:
+        var: ec2
+
+    - name: Save instance ID for later
+      set_fact:
+        ec2_id: "{{ ec2.instances[0].instance_id }}"
+
+    - name: Wait
       ansible.builtin.wait_for:
         host: "{{ ec2.instances[0].public_ip_address }}"
         port: 22
@@ -35,7 +42,7 @@
         name: "{{ ec2.instances[0].public_ip_address }}"
         groups: launched
         ansible_user: ubuntu
-        ansible_ssh_private_key_file: ~/.ssh/my_aws_key
+        ansible_ssh_private_key_file: devops_september.pem
 
 - name: Install Docker and run container
   hosts: launched
@@ -57,17 +64,17 @@
     - name: Run Docker container
       community.docker.docker_container:
         name: web
-        image: "{{ docker_image }}"
+        image: "nginx:latest"
         state: started
         ports:
           - "80:80"
 
-- name: Terminate EC2 instance
+- name: Remove instance
   hosts: localhost
   gather_facts: no
   tasks:
     - name: Terminate the instance
       amazon.aws.ec2_instance:
-        instance_ids: "{{ ec2.instances[0].id }}"
-        region: "{{ aws_region }}"
+        instance_ids: "{{ ec2_id }}"
+        region: "us-east-1"
         state: absent
