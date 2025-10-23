@@ -1,0 +1,14 @@
+---
+- name: Deploy Web Application
+  become: yes
+  hosts: remote_servers
+  tasks:
+    - name: Copy file
+      ansible.builtin.copy:
+        src: ~/test.txt
+        dest: /tmp/test.txt
+    
+    - name: Remove file from remote server
+      ansible.builtin.file:
+        path: /tmp/test.txt
+        state: absent

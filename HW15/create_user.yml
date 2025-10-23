@@ -1,0 +1,19 @@
+- name: Create user
+  hosts: remote_servers
+  become: yes
+  vars:
+    user_list:
+      - name: "sergey"
+        groups: "admins"
+      - name: "alex"
+        groups: "users"
+  tasks:
+    - name: Create a new user
+      user:
+        name: "{{ item.name }}"
+        state: present
+        groups: "{{ item.groups }}"
+        create_home: yes
+        append: yes
+        shell: /bin/bash
+      loop: "{{ user_list }}"
