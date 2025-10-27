@@ -1,0 +1,5 @@
+<Server port="8005" shutdown="SHUTDOWN">
+  <Service name="Catalina">
+    <Connector port="{{ tomcat_port | default(8080) }}" protocol="HTTP/1.1" />
+  </Service>
+</Server>

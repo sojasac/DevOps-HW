@@ -1,0 +1,5 @@
+- name: restart tomcat
+  ansible.builtin.systemd:
+    name: tomcat
+    state: restarted
+    enabled: yes

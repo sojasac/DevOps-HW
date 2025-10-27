@@ -1,0 +1,5 @@
+tomcat_version: 10.1.48
+tomcat_install_dir: /opt/tomcat
+tomcat_user: tomcat
+tomcat_group: tomcat
+tomcat_port: 8080

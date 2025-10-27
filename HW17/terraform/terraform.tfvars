@@ -1,0 +1,9 @@
+region              = "us-east-1"
+cluster_name        = "sergeyp-eks-cluster-v2"
+vpc_id              = "vpc-0ba16865d0655a924"
+private_subnet_ids  = ["subnet-02121ba4fc6137fc7", "subnet-091c355c067bc8713"]
+node_desired_capacity = 2
+node_min_size         = 1
+node_max_size         = 3
+node_instance_type    = "t3.small"
+ssh_key_name          = "devops_september"

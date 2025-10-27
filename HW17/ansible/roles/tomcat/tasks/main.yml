@@ -1,0 +1,66 @@
+- name: Проверка/устанвока Java
+  ansible.builtin.apt:
+    name: "openjdk-17-jdk"
+    state: present
+
+- name: Убедиться, что группа существует
+  ansible.builtin.group:
+    name: "{{ tomcat_group }}"
+    state: present
+
+- name: Убедиться, что пользователь существует
+  ansible.builtin.user:
+    name: "{{ tomcat_user }}"
+    group: "{{ tomcat_group }}"
+    create_home: no
+    shell: /bin/false
+
+- name: Скачать Tomcat
+  ansible.builtin.get_url:
+    url: "https://dlcdn.apache.org/tomcat/tomcat-10/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
+    dest: /tmp/apache-tomcat-{{ tomcat_version }}.tar.gz
+
+- name: Создать директорию для Tomcat
+  ansible.builtin.file:
+    path: "{{ tomcat_install_dir }}"
+    state: directory
+    owner: "{{ tomcat_user }}"
+    group: "{{ tomcat_group }}"
+    mode: "0755"
+
+- name: Распаковать Tomcat
+  ansible.builtin.unarchive:
+    src: /tmp/apache-tomcat-{{ tomcat_version }}.tar.gz
+    dest: "{{ tomcat_install_dir }}"
+    remote_src: yes
+    owner: "{{ tomcat_user }}"
+    group: "{{ tomcat_group }}"
+    extra_opts: [--strip-components=1]
+
+- name: Развернуть конфиг server.xml
+  ansible.builtin.template:
+    src: server.xml.j2
+    dest: "{{ tomcat_install_dir }}/conf/server.xml"
+    owner: "{{ tomcat_user }}"
+    group: "{{ tomcat_group }}"
+  notify: restart tomcat
+
+- name: Создать systemd unit
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/tomcat.service
+    content: |
+      [Unit]
+      Description=Apache Tomcat
+      After=network.target
+
+      [Service]
+      Type=forking
+      User={{ tomcat_user }}
+      Group={{ tomcat_group }}
+      ExecStart={{ tomcat_install_dir }}/bin/startup.sh
+      ExecStop={{ tomcat_install_dir }}/bin/shutdown.sh
+      Restart=on-failure
+
+      [Install]
+      WantedBy=multi-user.target
+  notify: restart tomcat

@@ -1,0 +1,5 @@
+- name: Deploy Tomcat Server
+  hosts: remote_servers
+  become: yes
+  roles:
+    - tomcat
